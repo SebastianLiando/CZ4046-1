@@ -10,5 +10,9 @@ fun main(args: Array<String>) {
 
     val mazeManager = MazeManager(maze, coordinateManager)
     println(mazeManager.getPrintableMaze())
+
+    val valueIterator = ValueIteration(Config.GAMMA, mazeManager)
+    valueIterator.runValueIteration(2)
+    println(valueIterator.getPrintableUtilities())
 }
 

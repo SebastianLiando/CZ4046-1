@@ -1,5 +1,7 @@
 package utils
 
+import extensions.isNonNegative
+
 /**
  * Manages conversion to and from a grid coordinate and list index. (0,0) is the top left of the grid.
  *
@@ -8,8 +10,7 @@ package utils
  */
 class CoordinateManager(val column: Int, val row: Int) {
     fun toIndex(x: Int, y: Int): Int {
-        require(x >= 0 && y >= 0) { "x and y must be positive!" }
-        require(x < column && y < row) { "x and y is out of bounds!" }
+        require(isCoordinateInBound(x, y)) { "x and y is out of bounds!" }
 
         return y * column + x
     }
@@ -22,4 +23,21 @@ class CoordinateManager(val column: Int, val row: Int) {
 
         return x to y
     }
+
+    fun getCoordinateAbove(x: Int, y: Int) = inBoundOrNull(x, y - 1)
+
+    fun getCoordinateBelow(x: Int, y: Int) = inBoundOrNull(x, y + 1)
+
+    fun getCoordinateLeft(x: Int, y: Int) = inBoundOrNull(x - 1, y)
+
+    fun getCoordinateRight(x: Int, y: Int) = inBoundOrNull(x + 1, y)
+
+    private fun inBoundOrNull(x: Int, y: Int) = if (isCoordinateInBound(x, y)) {
+        x to y
+    } else {
+        null
+    }
+
+    private fun isCoordinateInBound(x: Int, y: Int) =
+        x.isNonNegative && y.isNonNegative && x < column && y < row
 }

@@ -3,11 +3,17 @@ package utils
 import core.Config
 
 class MazeManager(val maze: List<String>, private val coordinateManager: CoordinateManager) {
+    /** The number of columns in the grid. */
     val columnCount
         get() = coordinateManager.column
 
+    /** The number of rows in the grid. */
     val rowCount
         get() = coordinateManager.row
+
+    /** The number of cells in the grid. */
+    val totalCell
+        get() = coordinateManager.column * coordinateManager.row
 
     fun isWall(x: Int, y: Int) = withCoordinate(x, y) { index ->
         maze[index].toLowerCase() == Config.WALL_CHAR.toString()
@@ -26,13 +32,14 @@ class MazeManager(val maze: List<String>, private val coordinateManager: Coordin
 
         var result = ""
 
-        (0 until coordinateManager.row).forEach { y ->
-            (0 until coordinateManager.column).forEach { x ->
-                withCoordinate(x, y) { index ->
-                    result += maze[index].padStart(longestString.length + pad)
-                }
+        pairCombination(
+            coordinateManager.column,
+            coordinateManager.row,
+            onNextY = { result += "\n" }
+        ) { x, y ->
+            withCoordinate(x, y) { index ->
+                result += maze[index].padStart(longestString.length + pad)
             }
-            result += "\n"
         }
 
         return result
@@ -48,6 +55,35 @@ class MazeManager(val maze: List<String>, private val coordinateManager: Coordin
             }
         }
     }
+
+    fun toIndex(x: Int, y: Int) = coordinateManager.toIndex(x, y)
+
+    fun toCoordinate(index: Int) = coordinateManager.toCoordinate(index)
+
+    /**
+     * Gets the resulting coordinate if the action [action] is taken. If
+     *
+     * @param x The current x position.
+     * @param y The current y position.
+     * @param action The action to take.
+     *
+     * @return The resulting coordinate if the action is successful, otherwise stay in the same position.
+     */
+    fun getCoordinateForAction(x: Int, y: Int, action: Action): Pair<Int, Int> {
+        val nextCoordinate = when (action) {
+            Action.UP -> coordinateManager.getCoordinateAbove(x, y)
+            Action.DOWN -> coordinateManager.getCoordinateBelow(x, y)
+            Action.LEFT -> coordinateManager.getCoordinateLeft(x, y)
+            Action.RIGHT -> coordinateManager.getCoordinateRight(x, y)
+        } ?: x to y
+
+        return if (isWall(nextCoordinate.first, nextCoordinate.second)) {
+            x to y
+        } else {
+            nextCoordinate
+        }
+    }
+
 
     private fun <T> withCoordinate(x: Int, y: Int, block: (index: Int) -> T): T {
         val correspondingIndex = coordinateManager.toIndex(x, y)

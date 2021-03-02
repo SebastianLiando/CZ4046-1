@@ -1,6 +1,7 @@
 package utils
 
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -52,6 +53,46 @@ class CoordinateManagerTest {
     @Test
     fun `Out of bounds index throws error`() {
         testRequire { sut.toCoordinate(36) }
+    }
+
+    @Test
+    fun `Get coordinate above exist`() {
+        assertThat(sut.getCoordinateAbove(3, 3), `is`(3 to 2))
+    }
+
+    @Test
+    fun `Get coordinate above not exist`() {
+        assertThat(sut.getCoordinateAbove(3, 0), `is`(nullValue()))
+    }
+
+    @Test
+    fun `Get coordinate below exist`() {
+        assertThat(sut.getCoordinateBelow(3, 3), `is`(3 to 4))
+    }
+
+    @Test
+    fun `Get coordinate below not exist`() {
+        assertThat(sut.getCoordinateBelow(3, 5), `is`(nullValue()))
+    }
+
+    @Test
+    fun `Get coordinate left exist`() {
+        assertThat(sut.getCoordinateLeft(3, 3), `is`(2 to 3))
+    }
+
+    @Test
+    fun `Get coordinate left not exist`() {
+        assertThat(sut.getCoordinateLeft(0, 0), `is`(nullValue()))
+    }
+
+    @Test
+    fun `Get coordinate right exist`() {
+        assertThat(sut.getCoordinateRight(3, 3), `is`(4 to 3))
+    }
+
+    @Test
+    fun `Get coordinate right not exist`() {
+        assertThat(sut.getCoordinateRight(5, 0), `is`(nullValue()))
     }
 
     private fun testRequire(block: () -> Unit) {
