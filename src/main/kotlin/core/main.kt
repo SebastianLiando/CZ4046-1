@@ -1,5 +1,6 @@
 package core
 
+import core.algorithm.ValueIteration
 import utils.CoordinateManager
 import utils.MazeManager
 import utils.loadMaze
@@ -12,7 +13,9 @@ fun main(args: Array<String>) {
     println(mazeManager.getPrintableMaze())
 
     val valueIterator = ValueIteration(Config.GAMMA, mazeManager)
-    valueIterator.runValueIteration(2)
+    valueIterator.runAlgorithm(3)
+
     println(valueIterator.getPrintableUtilities())
+    println(valueIterator.getPrintablePolicy())
 }
 

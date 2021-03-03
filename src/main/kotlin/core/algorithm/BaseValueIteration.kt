@@ -1,4 +1,4 @@
-package core
+package core.algorithm
 
 import extensions.round
 import utils.Action
@@ -7,27 +7,62 @@ import utils.doubleListOf
 import utils.pairCombination
 import kotlin.math.max
 
-class ValueIteration(private val gamma: Double, private val manager: MazeManager) {
+/**
+ * The base class for value iteration algorithm.
+ *
+ * @property gamma The discount factor.
+ * @property manager The maze manager.
+ */
+abstract class BaseValueIteration(private val gamma: Double, private val manager: MazeManager) {
     /** Current utilities of all states. */
     private var utilities = doubleListOf(value = 0.0, amount = manager.totalCell)
 
+    /** The optimal policy given the current utilities. */
+    val optimalPolicy: List<Action?>
+        get() = utilities.mapIndexed { index, _ ->
+            val (x, y) = manager.toCoordinate(index)
+
+            manager.getPossibleActions(x, y).maxByOrNull {
+                val (nextX, nextY) = manager.getCoordinateForAction(x, y, it)
+                utilities[manager.toIndex(nextX, nextY)]
+            }
+        }
+
+    /**
+     * Sets all states' utilities to zero.
+     *
+     */
     private fun resetUtility() {
         utilities = doubleListOf(0.0, manager.totalCell)
     }
 
-    fun runValueIteration(maxIteration: Int) {
+    /**
+     * Returns the best utility for the current state.
+     *
+     * @param x The x-coordinate of current state.
+     * @param y The y-coordinate of current state.
+     * @param actions The possible actions for the current state.
+     *
+     * @return The best utility for the current state.
+     */
+    abstract fun calculateBestUtilityForState(x: Int, y: Int, actions: List<Action>): Double?
+
+    /**
+     * Runs value iteration algorithm.
+     *
+     * @param maxIteration The number of iterations to do.
+     */
+    fun runAlgorithm(maxIteration: Int) {
         resetUtility()
 
-        var currentIterationNo = 1
         val nextUtilities = doubleListOf(0.0, manager.totalCell).toMutableList()
 
-        while (currentIterationNo <= maxIteration) {
+        repeat(maxIteration) {
             pairCombination(manager.rowCount, manager.columnCount) { x, y ->
                 val actions = manager.getPossibleActions(x, y)
 
                 // Best utility will be null if there is no possible action
-                val bestUtility = actions.map { calculateUtility(x, y, it) }
-                    .maxByOrNull { it }
+                val bestUtility = calculateBestUtilityForState(x, y, actions)
 
                 // Skip state with no action (AKA walls)
                 bestUtility?.let {
@@ -36,7 +71,6 @@ class ValueIteration(private val gamma: Double, private val manager: MazeManager
                 }
             }
 
-            currentIterationNo++
             utilities = nextUtilities
         }
     }
@@ -58,6 +92,18 @@ class ValueIteration(private val gamma: Double, private val manager: MazeManager
         return result
     }
 
+    fun getPrintablePolicy(pad: Int = 3): String {
+        val longestStringLength = "WALL".length
+        var result = ""
+
+        pairCombination(manager.rowCount, manager.columnCount, onNextY = { result += "\n" }) { x, y ->
+            val bestAction = optimalPolicy[manager.toIndex(x, y)]
+            result += (bestAction?.toString() ?: "WALL").padStart(longestStringLength + pad)
+        }
+
+        return result
+    }
+
     /**
      * Calculates the utility if the agent takes the specified action.
      *
@@ -67,7 +113,7 @@ class ValueIteration(private val gamma: Double, private val manager: MazeManager
      *
      * @return The resulting utility.
      */
-    private fun calculateUtility(x: Int, y: Int, action: Action): Double {
+    protected fun calculateUtility(x: Int, y: Int, action: Action): Double {
         val first = manager.getCoordinateForAction(x, y, action)
         var second = x to y
         var third = x to y
