@@ -27,23 +27,10 @@ class MazeManager(val maze: List<String>, private val coordinateManager: Coordin
         }
     }
 
-    fun getPrintableMaze(pad: Int = 3): String {
-        val longestString = maze.maxByOrNull { it.length }!!
-
-        var result = ""
-
-        pairCombination(
-            coordinateManager.column,
-            coordinateManager.row,
-            onNextY = { result += "\n" }
-        ) { x, y ->
-            withCoordinate(x, y) { index ->
-                result += maze[index].padStart(longestString.length + pad)
-            }
+    fun getPrintableMaze(pad: Int = 3) =
+        getTableLikeString(columnCount, rowCount, maze, pad) { cell, _ ->
+            if (cell == "W") "WALL" else cell
         }
-
-        return result
-    }
 
     fun getPossibleActions(x: Int, y: Int): List<Action> {
         return mutableListOf<Action>().apply {

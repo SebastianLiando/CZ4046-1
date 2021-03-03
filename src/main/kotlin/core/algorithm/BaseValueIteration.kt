@@ -15,6 +15,9 @@ abstract class BaseValueIteration(private val gamma: Double, private val manager
     var utilities = doubleListOf(value = 0.0, amount = manager.totalCell)
         private set
 
+    private val _historyUtilities = mutableListOf(utilities)
+    val historyUtilities: List<List<Double>> = _historyUtilities
+
     /** The optimal policy given the current utilities. */
     val optimalPolicy: List<Action?>
         get() = utilities.mapIndexed { index, _ ->
@@ -32,6 +35,8 @@ abstract class BaseValueIteration(private val gamma: Double, private val manager
      */
     private fun resetUtility() {
         utilities = doubleListOf(0.0, manager.totalCell)
+        _historyUtilities.clear()
+        _historyUtilities.add(utilities)
     }
 
     /**
@@ -69,6 +74,7 @@ abstract class BaseValueIteration(private val gamma: Double, private val manager
                 }
             }
 
+            _historyUtilities.add(nextUtilities)
             utilities = nextUtilities
         }
     }

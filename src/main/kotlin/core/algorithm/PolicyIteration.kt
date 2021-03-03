@@ -35,9 +35,14 @@ class PolicyIteration(
             return simplifiedIterator.utilities
         }
 
+    private val _historyUtilities = mutableListOf(estimatedUtility)
+    val historyUtilities: List<List<Double>> = _historyUtilities
+
     /** Resets the algorithm policy back to the initial policy. */
     private fun reset() {
         currentPolicy = getRandomPolicy()
+        _historyUtilities.clear()
+        _historyUtilities.add(estimatedUtility)
     }
 
     private fun getRandomPolicy(): List<Action?> {
@@ -79,6 +84,7 @@ class PolicyIteration(
             }
 
             currentPolicy = newOptimal
+            _historyUtilities.add(estimatedUtility)
         }
     }
 
