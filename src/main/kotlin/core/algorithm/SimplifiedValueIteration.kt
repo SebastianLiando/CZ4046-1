@@ -10,7 +10,7 @@ import utils.MazeManager
  * @property policy The actions that the agent should take at each state.
  */
 class SimplifiedValueIteration(
-    private val gamma: Double,
+    gamma: Double,
     private val manager: MazeManager,
     private val policy: List<Action?>
 ) : BaseValueIteration(gamma, manager) {

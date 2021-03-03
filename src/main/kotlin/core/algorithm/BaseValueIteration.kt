@@ -1,10 +1,7 @@
 package core.algorithm
 
 import extensions.round
-import utils.Action
-import utils.MazeManager
-import utils.doubleListOf
-import utils.pairCombination
+import utils.*
 import kotlin.math.max
 
 /**
@@ -15,7 +12,8 @@ import kotlin.math.max
  */
 abstract class BaseValueIteration(private val gamma: Double, private val manager: MazeManager) {
     /** Current utilities of all states. */
-    private var utilities = doubleListOf(value = 0.0, amount = manager.totalCell)
+    var utilities = doubleListOf(value = 0.0, amount = manager.totalCell)
+        private set
 
     /** The optimal policy given the current utilities. */
     val optimalPolicy: List<Action?>
@@ -76,32 +74,29 @@ abstract class BaseValueIteration(private val gamma: Double, private val manager
     }
 
     fun getPrintableUtilities(pad: Int = 3, decimalPlaces: Int = 5): String {
-        val rounded = utilities.map { it.round(decimalPlaces).toString() }
-        val maxLength = max(rounded.maxByOrNull { it.length }!!.length, "WALL".length)
-
-        var result = ""
-
-        pairCombination(manager.rowCount, manager.columnCount, onNextY = { result += "\n" }) { x, y ->
-            result += (if (!manager.isWall(x, y)) {
-                utilities[manager.toIndex(x, y)].round(decimalPlaces)
+        return getTableLikeString(
+            manager.columnCount,
+            manager.rowCount,
+            utilities,
+            pad
+        ) { utility, (x, y) ->
+            if (!manager.isWall(x, y)) {
+                utility.round(decimalPlaces).toString()
             } else {
                 "WALL"
-            }).toString().padStart(maxLength + pad)
+            }
         }
-
-        return result
     }
 
     fun getPrintablePolicy(pad: Int = 3): String {
-        val longestStringLength = "WALL".length
-        var result = ""
-
-        pairCombination(manager.rowCount, manager.columnCount, onNextY = { result += "\n" }) { x, y ->
-            val bestAction = optimalPolicy[manager.toIndex(x, y)]
-            result += (bestAction?.toString() ?: "WALL").padStart(longestStringLength + pad)
+        return getTableLikeString(
+            manager.columnCount,
+            manager.rowCount,
+            optimalPolicy,
+            pad
+        ) { action, _ ->
+            action?.toString() ?: "WALL"
         }
-
-        return result
     }
 
     /**

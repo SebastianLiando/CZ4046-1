@@ -1,9 +1,9 @@
 package core
 
+import core.algorithm.PolicyIteration
 import core.algorithm.ValueIteration
-import utils.CoordinateManager
-import utils.MazeManager
-import utils.loadMaze
+import extensions.contentEquals
+import utils.*
 
 fun main(args: Array<String>) {
     val maze = loadMaze("maze.txt")
@@ -13,9 +13,15 @@ fun main(args: Array<String>) {
     println(mazeManager.getPrintableMaze())
 
     val valueIterator = ValueIteration(Config.GAMMA, mazeManager)
-    valueIterator.runAlgorithm(3)
+    valueIterator.runAlgorithm(100)
 
     println(valueIterator.getPrintableUtilities())
     println(valueIterator.getPrintablePolicy())
+
+    val policyIterator = PolicyIteration(mazeManager, Config.GAMMA, 10)
+    policyIterator.runAlgorithm()
+
+    println(policyIterator.getPrintableEstimateUtilities())
+    println(policyIterator.getPrintablePolicy())
 }
 

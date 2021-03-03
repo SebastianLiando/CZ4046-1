@@ -24,3 +24,29 @@ fun pairCombination(maxX: Int, maxY: Int, onNextY: () -> Unit = {}, block: (Int,
         onNextY()
     }
 }
+
+fun <T> getTableLikeString(
+    column: Int, row: Int,
+    content: List<T>, pad: Int = 3,
+    toString: (T, coordinate: Pair<Int, Int>) -> String
+): String {
+    var result = ""
+
+    val coordinateManager = CoordinateManager(column, row)
+
+    val listOfString = content.mapIndexed { index, t ->
+        toString(t, coordinateManager.toCoordinate(index))
+    }
+
+    val longestStringLength = listOfString.maxByOrNull { it.length }?.length
+        ?: throw IllegalArgumentException("List must not be empty!")
+
+    pairCombination(row, column, onNextY = { result += "\n" }) { x, y ->
+        val index = coordinateManager.toIndex(x, y)
+        val item = listOfString[index]
+
+        result += item.padEnd(longestStringLength + pad)
+    }
+
+    return result
+}
