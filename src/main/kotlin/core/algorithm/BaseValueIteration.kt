@@ -2,6 +2,8 @@ package core.algorithm
 
 import extensions.round
 import utils.*
+import kotlin.math.ceil
+import kotlin.math.log10
 import kotlin.math.max
 
 /**
@@ -103,6 +105,16 @@ abstract class BaseValueIteration(private val gamma: Double, private val manager
         ) { action, _ ->
             action?.toString() ?: "WALL"
         }
+    }
+
+    /**
+     * Returns the number of iteration required to have an error of maximum [e].
+     *
+     * @param e The maximum error allowed.
+     * @return The number of iterations required.
+     */
+    fun getRequiredIterationForError(e: Double): Int {
+        return ceil(log10(2 * manager.maxReward / (e * (1 - gamma))) / log10(1 / gamma)).toInt()
     }
 
     /**

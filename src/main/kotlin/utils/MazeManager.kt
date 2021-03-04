@@ -2,7 +2,7 @@ package utils
 
 import core.Config
 
-class MazeManager(val maze: List<String>, private val coordinateManager: CoordinateManager) {
+class MazeManager(private val maze: List<String>, private val coordinateManager: CoordinateManager) {
     /** The number of columns in the grid. */
     val columnCount
         get() = coordinateManager.column
@@ -14,6 +14,10 @@ class MazeManager(val maze: List<String>, private val coordinateManager: Coordin
     /** The number of cells in the grid. */
     val totalCell
         get() = coordinateManager.column * coordinateManager.row
+
+    /** The maximum reward possible for the maze. */
+    val maxReward
+        get() = maze.mapNotNull { it.toDoubleOrNull() }.maxByOrNull { it } ?: 0.0
 
     fun isWall(x: Int, y: Int) = withCoordinate(x, y) { index ->
         maze[index].toLowerCase() == Config.WALL_CHAR.toString()
