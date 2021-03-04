@@ -1,10 +1,13 @@
 package core
 
+import core.algorithm.MarkovAlgorithm
 import core.algorithm.PolicyIteration
 import core.algorithm.ValueIteration
 import utils.CoordinateManager
+import utils.CsvWriter
 import utils.MazeManager
 import utils.loadMaze
+import java.io.File
 import java.util.*
 
 fun main() {
@@ -39,19 +42,13 @@ fun main() {
                 }.toDouble()
 
                 println("${titleDecorator}Value Iteration${titleDecorator}")
+
                 val valueIterator = ValueIteration(Config.GAMMA, mazeManager)
-                val requiredRuns = valueIterator.getRequiredIterationForError(maxError)
 
-                valueIterator.runAlgorithm(requiredRuns)
-
-                println("* State Utilities *")
-                println(valueIterator.getPrintableUtilities())
-                println("* Optimal policy *")
-                println(valueIterator.getPrintablePolicy())
-                println(
-                    "There are ${valueIterator.historyUtilities.size} history utilities " +
-                            "for $requiredRuns runs\n"
-                )
+                runAlgorithmThenReportResult(valueIterator, Config.valueIterationFile) {
+                    val requiredRuns = valueIterator.getRequiredIterationForError(maxError)
+                    valueIterator.runAlgorithm(requiredRuns)
+                }
             }
 
             2 -> {
@@ -59,17 +56,22 @@ fun main() {
                 val k = readUntilValid("Input parameter k: ") {
                     it.toIntOrNull() != null
                 }.toInt()
-                
-                println("${titleDecorator}Policy Iteration${titleDecorator}")
-                val policyIterator = PolicyIteration(mazeManager, Config.GAMMA, k)
-                policyIterator.runAlgorithm()
 
-                println()
-                println("* State Utilities *")
-                println(policyIterator.getPrintableEstimateUtilities())
-                println("* Optimal policy *")
-                println(policyIterator.getPrintablePolicy())
-                println("There are ${policyIterator.historyUtilities.size} history utilities")
+                val maxIteration = readUntilValid("Input max iteration (-1 for infinite): ") {
+                    it.toIntOrNull() != null
+                }.toInt()
+
+                println("${titleDecorator}Policy Iteration${titleDecorator}")
+
+                val policyIterator = PolicyIteration(mazeManager, Config.GAMMA, k)
+
+                runAlgorithmThenReportResult(policyIterator, Config.policyIterationFile) {
+                    if (maxIteration == -1) {
+                        policyIterator.runAlgorithm()
+                    } else {
+                        policyIterator.runAlgorithm(maxIteration)
+                    }
+                }
             }
 
             3 -> {
@@ -77,6 +79,37 @@ fun main() {
                 println(mazeManager.getPrintableMaze())
             }
         }
+    }
+}
+
+/**
+ * Runs MDP algorithm in the [run] block and report the result afterwards.
+ *
+ * @param algorithm The algorithm to run.
+ * @param reportFile The file to write the report to.
+ * @param run The block that runs the algorithm.
+ */
+private fun runAlgorithmThenReportResult(
+    algorithm: MarkovAlgorithm,
+    reportFile: File,
+    run: () -> Unit
+) {
+    run()
+
+    println("* State Utilities *")
+    println(algorithm.getPrintableUtilities())
+    println("* Optimal policy *")
+    println(algorithm.getPrintablePolicy())
+    println("There are ${algorithm.historyUtilities.size} history utilities")
+
+    val saveToFile = readUntilValid("Save state utilities history to file? (Y / N)") {
+        it.toLowerCase() in listOf("y", "n")
+    } == "y"
+
+    if (saveToFile) {
+        val writer = CsvWriter<Double>(reportFile)
+        writer.write(algorithm.historyUtilities)
+        println("Written state utilities history to ${reportFile.path}")
     }
 }
 

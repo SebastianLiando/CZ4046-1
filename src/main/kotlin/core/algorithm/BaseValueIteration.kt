@@ -1,10 +1,10 @@
 package core.algorithm
 
+import extensions.copy
 import extensions.round
 import utils.*
 import kotlin.math.ceil
 import kotlin.math.log10
-import kotlin.math.max
 
 /**
  * The base class for value iteration algorithm.
@@ -12,13 +12,15 @@ import kotlin.math.max
  * @property gamma The discount factor.
  * @property manager The maze manager.
  */
-abstract class BaseValueIteration(private val gamma: Double, private val manager: MazeManager) {
+abstract class BaseValueIteration(
+    private val gamma: Double, private val manager: MazeManager
+) : MarkovAlgorithm {
     /** Current utilities of all states. */
     var utilities = doubleListOf(value = 0.0, amount = manager.totalCell)
         private set
 
     private val _historyUtilities = mutableListOf(utilities)
-    val historyUtilities: List<List<Double>> = _historyUtilities
+    override val historyUtilities: List<List<Double>> = _historyUtilities
 
     /** The optimal policy given the current utilities. */
     val optimalPolicy: List<Action?>
@@ -76,12 +78,12 @@ abstract class BaseValueIteration(private val gamma: Double, private val manager
                 }
             }
 
-            _historyUtilities.add(nextUtilities)
+            _historyUtilities.add(nextUtilities.copy())
             utilities = nextUtilities
         }
     }
 
-    fun getPrintableUtilities(pad: Int = 3, decimalPlaces: Int = 5): String {
+    override fun getPrintableUtilities(pad: Int, decimalPlaces: Int): String {
         return getTableLikeString(
             manager.columnCount,
             manager.rowCount,
@@ -96,7 +98,7 @@ abstract class BaseValueIteration(private val gamma: Double, private val manager
         }
     }
 
-    fun getPrintablePolicy(pad: Int = 3): String {
+    override fun getPrintablePolicy(pad: Int): String {
         return getTableLikeString(
             manager.columnCount,
             manager.rowCount,

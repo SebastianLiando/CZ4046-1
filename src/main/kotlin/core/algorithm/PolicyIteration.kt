@@ -9,7 +9,6 @@ import utils.getTableLikeString
 /**
  * Runs policy iteration algorithm using modified policy evaluation.
  *
- * @property initialPolicy The initial policy to use.
  * @property manager The maze manager.
  * @property gamma The discount factor.
  * @property k The number of iterations for simplified value iteration.
@@ -18,7 +17,7 @@ class PolicyIteration(
     private val manager: MazeManager,
     private val gamma: Double,
     private val k: Int
-) {
+) : MarkovAlgorithm {
     /** The current policy. */
     private var currentPolicy: List<Action?>
 
@@ -36,7 +35,7 @@ class PolicyIteration(
         }
 
     private val _historyUtilities = mutableListOf(estimatedUtility)
-    val historyUtilities: List<List<Double>> = _historyUtilities
+    override val historyUtilities: List<List<Double>> = _historyUtilities
 
     /** Resets the algorithm policy back to the initial policy. */
     private fun reset() {
@@ -45,6 +44,11 @@ class PolicyIteration(
         _historyUtilities.add(estimatedUtility)
     }
 
+    /**
+     * Generates a random policy.
+     *
+     * @return Random policy.
+     */
     private fun getRandomPolicy(): List<Action?> {
         val randomPolicy = Array<Action?>(manager.rowCount * manager.columnCount) { null }
 
@@ -88,7 +92,7 @@ class PolicyIteration(
         }
     }
 
-    fun getPrintablePolicy(pad: Int = 3) = getTableLikeString(
+    override fun getPrintablePolicy(pad: Int) = getTableLikeString(
         manager.columnCount,
         manager.rowCount,
         currentPolicy,
@@ -97,7 +101,7 @@ class PolicyIteration(
         policy?.toString() ?: "WALL"
     }
 
-    fun getPrintableEstimateUtilities(pad: Int = 3, decimalPlaces: Int = 5) = getTableLikeString(
+    override fun getPrintableUtilities(pad: Int, decimalPlaces: Int) = getTableLikeString(
         manager.columnCount,
         manager.rowCount,
         estimatedUtility,
