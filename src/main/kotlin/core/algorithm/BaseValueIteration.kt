@@ -59,7 +59,7 @@ abstract class BaseValueIteration(
      *
      * @param maxIteration The number of iterations to do.
      */
-    fun runAlgorithm(maxIteration: Int) {
+    override fun runAlgorithm(maxIteration: Int) {
         resetUtility()
 
         val nextUtilities = doubleListOf(0.0, manager.totalCell).toMutableList()

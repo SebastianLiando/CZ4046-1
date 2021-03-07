@@ -2,6 +2,12 @@ package utils
 
 import core.Config
 
+/**
+ * Manages interaction with the mze.
+ *
+ * @property maze The maze states.
+ * @property coordinateManager The coordinate manager for the maze.
+ */
 class MazeManager(private val maze: List<String>, private val coordinateManager: CoordinateManager) {
     /** The number of columns in the grid. */
     val columnCount
@@ -19,10 +25,22 @@ class MazeManager(private val maze: List<String>, private val coordinateManager:
     val maxReward
         get() = maze.mapNotNull { it.toDoubleOrNull() }.maxByOrNull { it } ?: 0.0
 
+    /**
+     * Returns `true` if the cell from the given coordinate is a wall state.
+     *
+     * @param x The x coordinate.
+     * @param y The y coordinate.
+     */
     fun isWall(x: Int, y: Int) = withCoordinate(x, y) { index ->
         maze[index].toLowerCase() == Config.WALL_CHAR.toString()
     }
 
+    /**
+     * Returns the reward of the state from the given coordinate.
+     *
+     * @param x The x coordinate.
+     * @param y The y coordinate.
+     */
     fun getReward(x: Int, y: Int) = withCoordinate(x, y) { index ->
         when (val char = maze[index].toLowerCase()) {
             Config.START_CHAR.toString() -> -0.04
@@ -31,11 +49,24 @@ class MazeManager(private val maze: List<String>, private val coordinateManager:
         }
     }
 
+    /**
+     * Returns a table-like formatted String of the maze.
+     *
+     * @param pad The padding size between maze cells.
+     */
     fun getPrintableMaze(pad: Int = 3) =
         getTableLikeString(columnCount, rowCount, maze, pad) { cell, _ ->
             if (cell == "W") "WALL" else cell
         }
 
+    /**
+     * Returns all possible actions of the state from the given coordinate.
+     *
+     * @param x The x coordinate.
+     * @param y The y coordinate.
+     *
+     * @return List of possible actions.
+     */
     fun getPossibleActions(x: Int, y: Int): List<Action> {
         return mutableListOf<Action>().apply {
             if (!isWall(x, y)) {
@@ -47,8 +78,19 @@ class MazeManager(private val maze: List<String>, private val coordinateManager:
         }
     }
 
+    /**
+     * Converts coordinate to index.
+     *
+     * @param x The x coordinate.
+     * @param y The y coordinate.
+     */
     fun toIndex(x: Int, y: Int) = coordinateManager.toIndex(x, y)
 
+    /**
+     * Converts index to coordinate.
+     *
+     * @param index The index.
+     */
     fun toCoordinate(index: Int) = coordinateManager.toCoordinate(index)
 
     /**
@@ -75,7 +117,15 @@ class MazeManager(private val maze: List<String>, private val coordinateManager:
         }
     }
 
-
+    /**
+     * The [block] will have the corresponding index from the given coordinate.
+     *
+     * @param x The x coordinate.
+     * @param y The y coordinate.
+     * @param block The code that requires index.
+     *
+     * @return Whatever is returned from [block].
+     */
     private fun <T> withCoordinate(x: Int, y: Int, block: (index: Int) -> T): T {
         val correspondingIndex = coordinateManager.toIndex(x, y)
         return block(correspondingIndex)

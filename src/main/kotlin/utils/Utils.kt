@@ -25,6 +25,18 @@ fun pairCombination(maxX: Int, maxY: Int, onNextY: () -> Unit = {}, block: (Int,
     }
 }
 
+/**
+ * Returns a table-formatted [String].
+ *
+ * @param T
+ * @param column The number of columns.
+ * @param row The number of rows.
+ * @param content The content of the table.
+ * @param pad The padding between elements.
+ * @param toString How to convert each element to its String representation.
+ *
+ * @return A table-formatted [String].
+ */
 fun <T> getTableLikeString(
     column: Int, row: Int,
     content: List<T>, pad: Int = 3,

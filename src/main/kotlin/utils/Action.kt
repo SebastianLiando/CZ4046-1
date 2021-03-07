@@ -6,10 +6,4 @@ package utils
  */
 enum class Action {
     UP, DOWN, LEFT, RIGHT;
-
-    companion object {
-        /** Returns a random action in each call. */
-        val randomAction
-            get() = values().random()
-    }
 }

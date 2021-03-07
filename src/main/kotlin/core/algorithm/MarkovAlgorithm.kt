@@ -20,6 +20,13 @@ interface MarkovAlgorithm {
      */
     fun getPrintablePolicy(pad: Int = 3): String
 
+    /**
+     * Run the algorithm with limited number of iterations.
+     *
+     * @param maxIteration The maximum number of iterations.
+     */
+    fun runAlgorithm(maxIteration: Int = Int.MAX_VALUE)
+
     /** Contains the utilities of states in each iteration. */
     val historyUtilities: List<List<Double>>
 }

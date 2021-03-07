@@ -69,7 +69,7 @@ class PolicyIteration(
      *
      * @return The optimal policy.
      */
-    fun runAlgorithm(maxIteration: Int = Int.MAX_VALUE) {
+    override fun runAlgorithm(maxIteration: Int) {
         reset()
 
         repeat(maxIteration) {
