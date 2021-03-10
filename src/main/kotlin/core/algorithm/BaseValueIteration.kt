@@ -27,8 +27,11 @@ abstract class BaseValueIteration(
         get() = utilities.mapIndexed { index, _ ->
             val (x, y) = manager.toCoordinate(index)
 
+            // From all possible actions of this state
             manager.getPossibleActions(x, y).maxByOrNull {
+                // Get the resulting state from the action
                 val (nextX, nextY) = manager.getCoordinateForAction(x, y, it)
+                // Compare the utility
                 utilities[manager.toIndex(nextX, nextY)]
             }
         }
@@ -60,25 +63,35 @@ abstract class BaseValueIteration(
      * @param maxIteration The number of iterations to do.
      */
     override fun runAlgorithm(maxIteration: Int) {
+        // Set all utility to 0
         resetUtility()
 
+        // To save the utilities for the next state
         val nextUtilities = doubleListOf(0.0, manager.totalCell).toMutableList()
 
         repeat(maxIteration) {
+            // Iterate through every state
             pairCombination(manager.rowCount, manager.columnCount) { x, y ->
+                // Get all the possible actions of this state
                 val actions = manager.getPossibleActions(x, y)
 
-                // Best utility will be null if there is no possible action
+                /* Get max utility for the state.
+                 Best utility will be null if there is no possible action */
                 val bestUtility = calculateBestUtilityForState(x, y, actions)
 
-                // Skip state with no action (AKA walls)
+                // Skip state with no action (i.e. walls)
                 bestUtility?.let {
                     val indexToUpdate = manager.toIndex(x, y)
+
+                    // Calculate utility using Bellman equation
                     nextUtilities[indexToUpdate] = calculateNextUtility(x, y, it)
                 }
             }
 
+            // Add to history
             _historyUtilities.add(nextUtilities.copy())
+
+            // Update the utilities for the next iteration
             utilities = nextUtilities
         }
     }

@@ -39,7 +39,10 @@ class PolicyIteration(
 
     /** Resets the algorithm policy back to the initial policy. */
     private fun reset() {
+        // Assign random policy
         currentPolicy = getRandomPolicy()
+
+        // Clear state utility history
         _historyUtilities.clear()
         _historyUtilities.add(estimatedUtility)
     }
@@ -50,11 +53,16 @@ class PolicyIteration(
      * @return Random policy.
      */
     private fun getRandomPolicy(): List<Action?> {
+        // Start with null action on all states
         val randomPolicy = Array<Action?>(manager.rowCount * manager.columnCount) { null }
 
+        // Iterate through all state
         (0 until manager.rowCount * manager.columnCount).forEach { index ->
+            // Get the corresponding state
             val (x, y) = manager.toCoordinate(index)
 
+            /* Get random action from all possible actions in that state and
+             assign it to the state */
             val randomAction = manager.getPossibleActions(x, y).randomOrNull()
             randomAction?.let { randomPolicy[index] = it }
         }
@@ -70,8 +78,10 @@ class PolicyIteration(
      * @return The optimal policy.
      */
     override fun runAlgorithm(maxIteration: Int) {
+        // Set the current policy randomly
         reset()
 
+        // Limit the iteration count
         repeat(maxIteration) {
             print("\rIteration ${it + 1}")
             // Policy evaluation
@@ -82,11 +92,13 @@ class PolicyIteration(
             // Policy improvement
             val newOptimal = simplifiedIterator.optimalPolicy
 
+            // Stop algorithm if the policy does not change
             if (currentPolicy.contentEquals(newOptimal)) {
                 println("\rPolicy iteration ended in ${it + 1} iterations")
                 return
             }
 
+            // Update the current policy
             currentPolicy = newOptimal
             _historyUtilities.add(estimatedUtility)
         }
